@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FitJam - Opening Post...</title>
+    
+    <!-- Open Graph meta tags for better link previews -->
+    <meta property="og:title" content="FitJam Post">
+    <meta property="og:description" content="View this post in the FitJam app">
+    <meta property="og:type" content="website">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 400px;
+            animation: fadeIn 0.5s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .logo {
+            font-size: 48px;
+            margin-bottom: 20px;
+        }
+        
+        h1 {
+            font-size: 28px;
+            font-weight: 600;
+            margin-bottom: 16px;
+        }
+        
+        p {
+            font-size: 16px;
+            opacity: 0.9;
+            line-height: 1.5;
+            margin-bottom: 30px;
+        }
+        
+        .loader {
+            margin: 0 auto 30px;
+            width: 50px;
+            height: 50px;
+            border: 4px solid rgba(255,255,255,0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .button {
+            display: inline-block;
+            padding: 12px 24px;
+            background: white;
+            color: #667eea;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: transform 0.2s;
+        }
+        
+        .button:hover {
+            transform: scale(1.05);
+        }
+        
+        .error {
+            background: rgba(255, 59, 48, 0.2);
+            padding: 20px;
+            border-radius: 12px;
+            margin-top: 20px;
+        }
+    </style>
+    
+    <script>
+        // Function to get post ID from URL
+        function getPostIdFromUrl() {
+            const pathParts = window.location.pathname.split('/');
+            const postIndex = pathParts.indexOf('post');
+            
+            if (postIndex >= 0 && pathParts[postIndex + 1]) {
+                return pathParts[postIndex + 1];
+            }
+            
+            return null;
+        }
+        
+        // Function to detect platform
+        function getPlatform() {
+            const userAgent = navigator.userAgent.toLowerCase();
+            
+            if (/iphone|ipad|ipod/.test(userAgent)) {
+                return 'ios';
+            } else if (/android/.test(userAgent)) {
+                return 'android';
+            } else {
+                return 'desktop';
+            }
+        }
+        
+        // Function to open app or redirect to store
+        function openApp() {
+            const postId = getPostIdFromUrl();
+            const platform = getPlatform();
+            
+            console.log('Post ID:', postId);
+            console.log('Platform:', platform);
+            
+            if (!postId) {
+                document.getElementById('message').innerHTML = `
+                    <div class="error">
+                        <h1>Invalid Link</h1>
+                        <p>This link appears to be broken or incomplete.</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            // Try to open the app
+            const appUrl = `fitjam://post/${postId}`;
+            console.log('Attempting to open:', appUrl);
+            window.location.href = appUrl;
+            
+            // Set timeout to redirect to store if app doesn't open
+            setTimeout(() => {
+                let storeUrl;
+                
+                if (platform === 'ios') {
+                    // Replace with your actual App Store URL
+                    storeUrl = 'https://apps.apple.com/app/fitjam/id123456789';
+                    console.log('Redirecting to App Store:', storeUrl);
+                } else if (platform === 'android') {
+                    // Replace with your actual Play Store URL
+                    storeUrl = 'https://play.google.com/store/apps/details?id=com.example.fit';
+                    console.log('Redirecting to Play Store:', storeUrl);
+                } else {
+                    // Desktop - show message
+                    document.getElementById('message').innerHTML = `
+                        <div class="logo">📱</div>
+                        <h1>Download FitJam</h1>
+                        <p>This link is meant to be opened in the FitJam mobile app.</p>
+                        <p>Download FitJam on your phone to view this post.</p>
+                    `;
+                    return;
+                }
+                
+                window.location.href = storeUrl;
+            }, 2000); // Wait 2 seconds before redirecting to store
+        }
+        
+        // Run when page loads
+        window.addEventListener('DOMContentLoaded', openApp);
+    </script>
+</head>
+<body>
+    <div class="container">
+        <div id="message">
+            <div class="logo">🏋️</div>
+            <h1>Opening FitJam...</h1>
+            <div class="loader"></div>
+            <p>If the app doesn't open automatically, you'll be redirected to download it.</p>
+        </div>
+    </div>
+</body>
+</html>
