@@ -10,9 +10,6 @@
     <meta property="og:description" content="View this post in the FitJam app">
     <meta property="og:type" content="website">
     
-    <!-- Favicon to prevent 404 error -->
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏋️</text></svg>">
-    
     <style>
         * {
             margin: 0;
@@ -57,7 +54,7 @@
             font-size: 16px;
             opacity: 0.9;
             line-height: 1.5;
-            margin-bottom: 20px;
+            margin-bottom: 30px;
         }
         
         .loader {
@@ -83,7 +80,6 @@
             border-radius: 8px;
             font-weight: 600;
             transition: transform 0.2s;
-            margin-top: 20px;
         }
         
         .button:hover {
@@ -96,37 +92,74 @@
             border-radius: 12px;
             margin-top: 20px;
         }
-        
-        .success {
-            background: rgba(52, 199, 89, 0.2);
-            padding: 20px;
-            border-radius: 12px;
-            margin-top: 20px;
-        }
-        
-        .debug-info {
-            background: rgba(0, 0, 0, 0.3);
-            padding: 15px;
-            border-radius: 8px;
-            margin-top: 20px;
-            font-size: 11px;
-            text-align: left;
-            font-family: 'Courier New', monospace;
-            max-height: 300px;
-            overflow-y: auto;
-            word-break: break-all;
-        }
-        
-        .debug-info p {
-            margin: 5px 0;
-            opacity: 1;
-            font-size: 11px;
-        }
-        
-        .debug-info strong {
-            color: #a8ff78;
-        }
     </style>
+    
+    <script>
+        function getPostIdFromUrl() {
+            const pathParts = window.location.pathname.split('/');
+            const postIndex = pathParts.indexOf('post');
+            
+            if (postIndex >= 0 && pathParts[postIndex + 1]) {
+                return pathParts[postIndex + 1];
+            }
+            
+            return null;
+        }
+        
+        function getPlatform() {
+            const userAgent = navigator.userAgent.toLowerCase();
+            
+            if (/iphone|ipad|ipod/.test(userAgent)) {
+                return 'ios';
+            } else if (/android/.test(userAgent)) {
+                return 'android';
+            } else {
+                return 'desktop';
+            }
+        }
+        
+        function openApp() {
+            const postId = getPostIdFromUrl();
+            const platform = getPlatform();
+            
+            console.log('Post ID:', postId);
+            console.log('Platform:', platform);
+            
+            if (!postId) {
+                document.getElementById('message').innerHTML = `
+                    <div class="error">
+                        <h1>Invalid Link</h1>
+                        <p>This link appears to be broken or incomplete.</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            if (platform === 'android') {
+                // Intent URL is the ONLY reliable way on Chrome Android
+                const intentUrl = `intent://post/${postId}#Intent;scheme=fitjam;package=com.example.fit;S.browser_fallback_url=https%3A%2F%2Fplay.google.com%2Fstore%2Fapps%2Fdetails%3Fid%3Dcom.example.fit;end`;
+                console.log('Android Intent URL:', intentUrl);
+                window.location.href = intentUrl;
+            } else if (platform === 'ios') {
+                const appUrl = `fitjam://post/${postId}`;
+                console.log('Attempting to open:', appUrl);
+                window.location.href = appUrl;
+                
+                setTimeout(() => {
+                    window.location.href = 'https://apps.apple.com/app/fitjam/id123456789';
+                }, 2000);
+            } else {
+                document.getElementById('message').innerHTML = `
+                    <div class="logo">📱</div>
+                    <h1>Download FitJam</h1>
+                    <p>This link is meant to be opened in the FitJam mobile app.</p>
+                    <p>Download FitJam on your phone to view this post.</p>
+                `;
+            }
+        }
+        
+        window.addEventListener('DOMContentLoaded', openApp);
+    </script>
 </head>
 <body>
     <div class="container">
@@ -137,170 +170,5 @@
             <p>If the app doesn't open automatically, you'll be redirected to download it.</p>
         </div>
     </div>
-    
-    <script>
-        (function() {
-            // Enable debug mode by adding &debug=true to URL
-            const urlParams = new URLSearchParams(window.location.search);
-            const DEBUG = urlParams.get('debug') === 'true';
-            
-            const debugLogs = [];
-            
-            function log(label, value) {
-                const logMsg = value !== undefined ? `${label}: ${value}` : label;
-                console.log(logMsg);
-                debugLogs.push(logMsg);
-            }
-            
-            function showDebug() {
-                if (!DEBUG) return;
-                
-                const debugDiv = document.createElement('div');
-                debugDiv.className = 'debug-info';
-                debugDiv.innerHTML = '<p><strong>=== DEBUG INFO ===</strong></p>';
-                debugLogs.forEach(logLine => {
-                    const p = document.createElement('p');
-                    p.textContent = logLine;
-                    debugDiv.appendChild(p);
-                });
-                document.getElementById('message').appendChild(debugDiv);
-            }
-            
-            // Function to get post ID from URL
-            function getPostIdFromUrl() {
-                log('Full URL', window.location.href);
-                log('Search string', window.location.search);
-                log('Hash', window.location.hash);
-                
-                // Parse URL parameters
-                const params = new URLSearchParams(window.location.search);
-                
-                // Log all parameters
-                log('All URL params', Array.from(params.entries()).map(([k,v]) => `${k}=${v}`).join(', '));
-                
-                // Try to get 'post' parameter
-                const postId = params.get('post');
-                log('Post ID from params.get', postId);
-                
-                if (postId) {
-                    return postId;
-                }
-                
-                // Try hash-based (backup)
-                const hash = window.location.hash.substring(1);
-                if (hash) {
-                    if (hash.startsWith('post=')) {
-                        return hash.replace('post=', '');
-                    } else if (hash.startsWith('post/')) {
-                        return hash.replace('post/', '');
-                    }
-                }
-                
-                return null;
-            }
-            
-            // Function to detect platform
-            function getPlatform() {
-                const userAgent = navigator.userAgent.toLowerCase();
-                
-                if (/iphone|ipad|ipod/.test(userAgent)) {
-                    return 'ios';
-                } else if (/android/.test(userAgent)) {
-                    return 'android';
-                } else {
-                    return 'desktop';
-                }
-            }
-            
-            // Function to open app or redirect to store
-            function openApp() {
-                const postId = getPostIdFromUrl();
-                const platform = getPlatform();
-                
-                log('Detected platform', platform);
-                log('Extracted post ID', postId || 'NONE');
-                log('User agent', navigator.userAgent);
-                
-                if (!postId) {
-                    document.getElementById('message').innerHTML = `
-                        <div class="error">
-                            <div class="logo">❌</div>
-                            <h1>Invalid Link</h1>
-                            <p>No post ID found in the URL.</p>
-                            <p style="font-size: 12px; opacity: 0.7;">URL: ${window.location.href}</p>
-                        </div>
-                    `;
-                    showDebug();
-                    return;
-                }
-                
-                // Show success message for desktop
-                if (platform === 'desktop') {
-                    if (DEBUG) {
-                        document.getElementById('message').innerHTML = `
-                            <div class="success">
-                                <div class="logo">✅</div>
-                                <h1>Post ID Found!</h1>
-                                <p>Post ID: <strong>${postId}</strong></p>
-                                <p>On mobile, this would open: <code>fitjam://post/${postId}</code></p>
-                            </div>
-                        `;
-                        showDebug();
-                        return;
-                    }
-                }
-                
-                // Build the deep link
-                const appUrl = `fitjam://post/${postId}`;
-                log('Deep link URL', appUrl);
-                
-                // Try to open the app
-                if (platform === 'ios') {
-                    // iOS universal link approach
-                    window.location.href = appUrl;
-                } else if (platform === 'android') {
-                    // Android intent URL
-                    const intentUrl = `intent://post/${postId}#Intent;scheme=fitjam;package=com.fitjam.app;end`;
-                    log('Android intent URL', intentUrl);
-                    window.location.href = intentUrl;
-                } else {
-                    // Desktop - try the URL anyway
-                    window.location.href = appUrl;
-                }
-                
-                // Set timeout to redirect to store if app doesn't open
-                setTimeout(() => {
-                    if (platform === 'ios') {
-                        // Replace with your actual App Store URL
-                        const storeUrl = 'https://apps.apple.com/app/fitjam/id123456789';
-                        log('Redirecting to App Store', storeUrl);
-                        window.location.href = storeUrl;
-                    } else if (platform === 'android') {
-                        // Replace with your actual Play Store URL
-                        const storeUrl = 'https://play.google.com/store/apps/details?id=com.fitjam.app';
-                        log('Redirecting to Play Store', storeUrl);
-                        window.location.href = storeUrl;
-                    } else {
-                        // Desktop - show download message
-                        document.getElementById('message').innerHTML = `
-                            <div class="logo">📱</div>
-                            <h1>Download FitJam</h1>
-                            <p>This link is meant to be opened in the FitJam mobile app.</p>
-                            <p>Download FitJam on your phone to view this post.</p>
-                            <a href="${window.location.href}" class="button">Try Again</a>
-                        `;
-                        showDebug();
-                    }
-                }, 2500);
-            }
-            
-            // Run when DOM is ready
-            if (document.readyState === 'loading') {
-                document.addEventListener('DOMContentLoaded', openApp);
-            } else {
-                openApp();
-            }
-        })();
-    </script>
 </body>
 </html>
