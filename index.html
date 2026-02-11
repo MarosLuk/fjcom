@@ -96,9 +96,14 @@
     
     <script>
     function getPostIdFromUrl() {
-        // First try query parameter: ?post=POST_ID
+        // Try query parameter: ?post=POST_ID
         const urlParams = new URLSearchParams(window.location.search);
         const postId = urlParams.get('post');
+        
+        // Debug: show what we're getting
+        console.log('Full URL:', window.location.href);
+        console.log('Search:', window.location.search);
+        console.log('Post ID from query:', postId);
         
         if (postId) {
             return postId;
@@ -131,39 +136,40 @@
         const postId = getPostIdFromUrl();
         const platform = getPlatform();
         
-        console.log('Post ID:', postId);
-        console.log('Platform:', platform);
+        // Show debug info on screen temporarily
+        document.getElementById('message').innerHTML = `
+            <div class="logo">🔍</div>
+            <h1>Debug Info</h1>
+            <p><strong>URL:</strong> ${window.location.href}</p>
+            <p><strong>Search:</strong> ${window.location.search}</p>
+            <p><strong>Post ID:</strong> ${postId || 'NULL'}</p>
+            <p><strong>Platform:</strong> ${platform}</p>
+        `;
         
+        // Delay the actual redirect so you can see debug info
         if (!postId) {
-            document.getElementById('message').innerHTML = `
-                <div class="error">
-                    <h1>Invalid Link</h1>
-                    <p>This link appears to be broken or incomplete.</p>
-                </div>
-            `;
             return;
         }
         
-        if (platform === 'android') {
-            const intentUrl = `intent://post/${postId}#Intent;scheme=fitjam;package=com.example.fit;S.browser_fallback_url=https%3A%2F%2Fplay.google.com%2Fstore%2Fapps%2Fdetails%3Fid%3Dcom.example.fit;end`;
-            console.log('Android Intent URL:', intentUrl);
-            window.location.href = intentUrl;
-        } else if (platform === 'ios') {
-            const appUrl = `fitjam://post/${postId}`;
-            console.log('Attempting to open:', appUrl);
-            window.location.href = appUrl;
-            
-            setTimeout(() => {
-                window.location.href = 'https://apps.apple.com/app/fitjam/id123456789';
-            }, 2000);
-        } else {
-            document.getElementById('message').innerHTML = `
-                <div class="logo">📱</div>
-                <h1>Download FitJam</h1>
-                <p>This link is meant to be opened in the FitJam mobile app.</p>
-                <p>Download FitJam on your phone to view this post.</p>
-            `;
-        }
+        setTimeout(() => {
+            if (platform === 'android') {
+                const intentUrl = `intent://post/${postId}#Intent;scheme=fitjam;package=com.example.fit;S.browser_fallback_url=https%3A%2F%2Fplay.google.com%2Fstore%2Fapps%2Fdetails%3Fid%3Dcom.example.fit;end`;
+                window.location.href = intentUrl;
+            } else if (platform === 'ios') {
+                const appUrl = `fitjam://post/${postId}`;
+                window.location.href = appUrl;
+                
+                setTimeout(() => {
+                    window.location.href = 'https://apps.apple.com/app/fitjam/id123456789';
+                }, 2000);
+            } else {
+                document.getElementById('message').innerHTML = `
+                    <div class="logo">📱</div>
+                    <h1>Download FitJam</h1>
+                    <p>This link is meant to be opened in the FitJam mobile app.</p>
+                `;
+            }
+        }, 3000); // 3 second delay so you can read debug info
     }
     
     window.addEventListener('DOMContentLoaded', openApp);
