@@ -153,9 +153,10 @@
         
         setTimeout(() => {
             if (platform === 'android') {
-                const intentUrl = `intent://post/${postId}#Intent;scheme=fitjam;package=com.example.fit;S.browser_fallback_url=https%3A%2F%2Fplay.google.com%2Fstore%2Fapps%2Fdetails%3Fid%3Dcom.example.fit;end`;
-                window.location.href = intentUrl;
-            } else if (platform === 'ios') {
+    const intentUrl = `intent://post/${postId}#Intent;scheme=fitjam;package=app.fitjamglobalplatform.fitjam;S.browser_fallback_url=https%3A%2F%2Fmarosluk.github.io%2Ffjcom%2Findex.html%3Fnoredirect%3Dtrue;end`;
+    console.log('Android Intent URL:', intentUrl);
+    window.location.href = intentUrl;
+} else if (platform === 'ios') {
                 const appUrl = `fitjam://post/${postId}`;
                 window.location.href = appUrl;
                 
