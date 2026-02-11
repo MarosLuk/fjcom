@@ -154,8 +154,22 @@
         setTimeout(() => {
             if (platform === 'android') {
     const intentUrl = `intent://post/${postId}#Intent;scheme=fitjam;package=app.fitjamglobalplatform.fitjam;S.browser_fallback_url=https%3A%2F%2Fmarosluk.github.io%2Ffjcom%2Findex.html%3Fnoredirect%3Dtrue;end`;
+    
+    // Show the Intent URL on screen for debugging
+    document.getElementById('message').innerHTML = `
+        <div class="logo">🔍</div>
+        <h1>Android Intent</h1>
+        <p style="word-break: break-all; font-size: 12px; background: rgba(0,0,0,0.2); padding: 10px; border-radius: 8px;">
+            ${intentUrl}
+        </p>
+        <p>Redirecting in 2 seconds...</p>
+    `;
+    
     console.log('Android Intent URL:', intentUrl);
-    window.location.href = intentUrl;
+    
+    setTimeout(() => {
+        window.location.href = intentUrl;
+    }, 2000);
 } else if (platform === 'ios') {
                 const appUrl = `fitjam://post/${postId}`;
                 window.location.href = appUrl;
